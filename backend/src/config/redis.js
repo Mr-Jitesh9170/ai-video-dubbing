@@ -1,17 +1,49 @@
 const Redis = require("ioredis");
 
-const redis = new Redis({
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_PASSWORD || undefined,
+const redisClient = new Redis({
+  host: process.env.REDIS_HOST || "redis",
+  port: Number(process.env.REDIS_PORT) || 6379,
+  password: process.env.REDIS_PASSWORD || undefined,
+  maxRetriesPerRequest: null
 });
 
-redis.on("connect", () => {
-    console.log("✅ Redis connected");
+redisClient.on("connect", () => {
+  console.log("🔄 Redis connecting...");
 });
 
-redis.on("error", (error) => {
-    console.error("❌ Redis error:", error.message);
+redisClient.on("ready", () => {
+  console.log("✅ Redis ready");
 });
 
-module.exports = redis;
+redisClient.on("error", (error) => {
+  console.error("❌ Redis error:", error.message);
+});
+
+const connectRedis = async () => {
+  if (redisClient.status !== "ready") {
+    await new Promise((resolve, reject) => {
+      const onReady = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = (error) => {
+        cleanup();
+        reject(error);
+      };
+
+      const cleanup = () => {
+        redisClient.off("ready", onReady);
+        redisClient.off("error", onError);
+      };
+
+      redisClient.once("ready", onReady);
+      redisClient.once("error", onError);
+    });
+  }
+};
+
+module.exports = {
+  redisClient,
+  connectRedis
+};

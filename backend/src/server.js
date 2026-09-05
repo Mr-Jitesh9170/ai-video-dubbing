@@ -1,35 +1,61 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const morgan = require("morgan");
 require("dotenv").config();
 
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const morgan = require("morgan");
+
 const connectDatabase = require("./config/database");
-require("./config/redis");
+const { connectRedis } = require("./config/redis");
+
+const videoRoutes = require("./routes/video.routes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
+// Security
 app.use(helmet());
+
+// CORS
 app.use(cors());
+
+// Request logging
 app.use(morgan("dev"));
+
+// Body parser
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get("/health", (req, res) => {
-    res.status(200).json({
+    res.json({
         success: true,
-        message: "AI Video Dubbing API is running!",
-        timestamp: new Date().toISOString()
+        message: "AI Video Dubbing API is running"
     });
 });
 
+// Routes
+app.use("/api/videos", videoRoutes);
+
+// Start server
 const startServer = async () => {
-    await connectDatabase();
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
+    try {
+        await connectRedis();
+        await connectDatabase();
+
+        const port = process.env.PORT || 5000;
+
+        app.listen(port, () => {
+            console.log(
+                `🚀 Server running on http://localhost:${port}`
+            );
+        });
+    } catch (error) {
+        console.error(
+            "❌ Server startup failed:",
+            error.message
+        );
+
+        process.exit(1);
+    }
 };
 
 startServer();
