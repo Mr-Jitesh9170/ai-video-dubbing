@@ -10,6 +10,7 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+
   redis:
     image: redis:7-alpine
     container_name: ai-dubbing-redis
@@ -20,6 +21,7 @@ services:
 
     volumes:
       - redis_data:/data
+
 
   backend:
     build:
@@ -43,6 +45,9 @@ services:
       - mongodb
       - redis
       - stt
+      - translation
+      - tts
+
 
   worker:
     build:
@@ -63,8 +68,11 @@ services:
       - mongodb
       - redis
       - stt
+      - translation
+      - tts
 
     command: node workers/dubbing.worker.js
+
 
   stt:
     build:
@@ -76,6 +84,35 @@ services:
 
     ports:
       - "8000:8000"
+
+
+  translation:
+    build:
+      context: ./translation
+      dockerfile: Dockerfile
+
+    container_name: ai-dubbing-translation
+    restart: unless-stopped
+
+    ports:
+      - "8001:8001"
+
+
+  tts:
+    build:
+      context: ./tts
+      dockerfile: Dockerfile
+
+    container_name: ai-dubbing-tts
+    restart: unless-stopped
+
+    ports:
+      - "8002:8002"
+
+    volumes:
+      - ./backend/temp:/shared
+      - ./tts/models:/models:ro
+
 
 volumes:
   mongodb_data:

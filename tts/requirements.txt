@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+python-multipart
+piper-tts==1.8.0
