@@ -8,10 +8,10 @@ const DubbingJob = require("../src/models/DubbingJob");
 const { runFFmpeg } = require("../src/utils/ffmpeg");
 
 const { transcribeAudio } = require("../src/services/stt.service");
-
 const { translateText } = require(
     "../src/services/translation.service"
 );
+const { synthesizeSpeech } = require("../src/services/tts.service");
 
 
 const connection = {
@@ -304,17 +304,47 @@ const processDubbingJob = async (job) => {
         =================================
         */
 
+        console.log("🔊 Starting text-to-speech...");
+
+        const tts = await synthesizeSpeech({
+            text: translation.text,
+            language: job.data.targetLanguage
+        });
+
+        console.log("🔊 TTS audio generated");
+        console.log(
+            "TTS audio path:",
+            tts.audioPath
+        );
+
+        // TTS container uses /shared
+        // Worker uses /app/temp
+        const ttsAudioPath = tts.audioPath.replace(
+            "/shared/",
+            "/app/temp/"
+        );
+
+        console.log(
+            "Worker TTS audio path:",
+            ttsAudioPath
+        );
+
+        dubbingJob.progress = 75;
+        await dubbingJob.save();
+
+        console.log("📊 Progress: 75%");
+
+
         return {
-
             success: true,
-
             audioPath,
-
             transcription,
-
-            translation
+            translation,
+            tts: {
+                ...tts,
+                audioPath: ttsAudioPath
+            }
         };
-
 
     } catch (error) {
 
@@ -348,9 +378,9 @@ const worker = new Worker(
     "video-dubbing",
     processDubbingJob,
     {
-        connection, 
-        concurrency: 1, 
-        lockDuration: 10 * 60 * 1000, 
+        connection,
+        concurrency: 1,
+        lockDuration: 10 * 60 * 1000,
         lockRenewTime: 60 * 1000
     }
 );

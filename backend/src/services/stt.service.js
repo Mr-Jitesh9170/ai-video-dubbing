@@ -29,13 +29,24 @@ const transcribeAudio = async (audioPath) => {
 
     console.log("📡 Sending audio to Python STT service...");
 
-    const response = await fetch(
-        "http://stt:8000/transcribe",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
+    let response;
+    try {
+        response = await fetch(
+            "http://stt:8000/transcribe",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+    } catch (error) {
+        console.error("❌ STT FETCH ERROR");
+        console.error("Name:", error.name);
+        console.error("Message:", error.message);
+        console.error("Cause:", error.cause);
+        console.error("Stack:", error.stack);
+
+        throw error;
+    }
 
     if (!response.ok) {
         throw new Error(
@@ -64,3 +75,4 @@ const transcribeAudio = async (audioPath) => {
 module.exports = {
     transcribeAudio
 };
+
