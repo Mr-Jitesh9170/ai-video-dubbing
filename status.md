@@ -1,20 +1,26 @@
-| Component              | Status |
-| ---------------------- | ------ |
-| Express API            | ✅      |
-| Video upload           | ✅      |
-| Multer storage         | ✅      |
-| MongoDB                | ✅      |
-| Video model            | ✅      |
-| DubbingJob model       | ✅      |
-| Redis                  | ✅      |
-| BullMQ Queue           | ✅      |
-| Worker                 | ✅      |
-| Worker consumes jobs   | ✅      |
-| Job status updates     | ✅      |
-| FFmpeg                 | ⏳      |
-| Audio extraction       | ⏳      |
-| Speech-to-Text         | ⏳      |
-| Translation            | ⏳      |
-| Text-to-Speech         | ⏳      |
-| Voice synchronization  | ⏳      |
-| Final video generation | ⏳      |
+                         STATUS
+
+Project structure       ✅
+Docker                  ✅
+Docker Compose          ✅
+MongoDB                 ✅
+Redis                   ✅
+Express API             ✅
+Video upload            ✅
+MongoDB models          ✅
+BullMQ queue            ✅
+Worker                  ✅
+FFmpeg                  ✅
+Audio extraction        ✅
+STT architecture       ✅
+STT actual processing   🟡 ← YOU ARE HERE
+
+Translation             ⬜
+TTS                     ⬜
+Audio synchronization   ⬜
+Final video generation  ⬜
+Job progress            🟡
+Error handling          🟡
+API status endpoint     ⬜
+Testing                 ⬜
+Documentation           ⬜

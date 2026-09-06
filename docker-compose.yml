@@ -37,11 +37,12 @@ services:
 
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - backend_node_modules:/app/node_modules
 
     depends_on:
       - mongodb
       - redis
+      - stt
 
   worker:
     build:
@@ -56,14 +57,27 @@ services:
 
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - backend_node_modules:/app/node_modules
 
     depends_on:
       - mongodb
       - redis
+      - stt
 
     command: node workers/dubbing.worker.js
+
+  stt:
+    build:
+      context: ./stt
+      dockerfile: Dockerfile
+
+    container_name: ai-dubbing-stt
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
 
 volumes:
   mongodb_data:
   redis_data:
+  backend_node_modules:
